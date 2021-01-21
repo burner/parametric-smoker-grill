@@ -1,14 +1,34 @@
 include <helper.scad>
 
+//
+// All numbers are in millimeter
+//
+
 thick = 5;
+
+angleWidth = 50;
+angleHeight = 50;
+angleThick = 4;
+
+// Firebox
 
 fbW = 500;
 fbD = 500;
 fbH = 600;
 
+/// Firebox basket
+
+fbBkMinBottomOffset = 30;
+fbBkMaxBottomOffset = 30;
+fbBkHeight = 200;
+fbBkNumRacks = 3;
+
+// Smoke Stack
 ssW = fbW;
 ssD = fbD;
 ssH = 800;
+
+// Chamber
 
 chamBottomD = 200;
 chamTopD = 200;
@@ -18,6 +38,15 @@ chamWidth = 800;
 chamOffset = 350; // the Z offset of the chamber in relation to the firebox
 chamHeight = 600;
 chamFrontBackOffset = 150;
+
+module angle(l) {
+	union() {
+		cube([angleWidth, l, angleThick]);	
+		translate([0,0,angleThick]) {
+			cube([angleThick, l, angleHeight - angleThick]);
+		}
+	}
+}
 
 module box(plan, x, y) {
 	if(plan) {
@@ -196,9 +225,9 @@ module chamFace(plan) {
 		}
 	}
 
-	translate([chamFrontBackOffset - thick, 0, thick]) {
+	translate([chamFrontBackOffset - thick, 0, 0]) {
 		if(plan) {
-			translate([0, 0, -thick]) {
+			translate([0, 0, 0]) {
 				rotate([0,0,90]) {
 					prism2(dB, chamFrontBackOffset - thick);
 				}
@@ -360,6 +389,25 @@ module fbPlan(plan) {
 
 }
 
+module fbBasketSlots(plan) {
+	h = (fbH - fbBkMaxBottomOffset - angleHeight) - (fbBkMinBottomOffset + fbBkHeight);
+	stepHeight = h / (fbBkNumRacks - 1);
+	echo(stepHeight);
+	for(i = [(fbBkMinBottomOffset + fbBkHeight) : stepHeight : (fbH - fbBkMaxBottomOffset - angleHeight)]) {
+		echo(i);
+		translate([fbW-thick,0,i]) {
+			rotate([0,0,90]) {
+				#angle(fbW-thick*2);
+			}
+		}
+		translate([thick,fbD,i]) {
+			rotate([0,0,-90]) {
+				angle(fbW-thick*2);
+			}
+		}
+	}
+}
+
 module fbBuild(plan) {
 	fbBottom(plan);
 	translate([0,fbD+thick,0]) {
@@ -374,7 +422,7 @@ module fbBuild(plan) {
 	}
 	translate([fbW,0,thick]) {
 		rotate([0,-90,0]) {
-			fbRight(plan);
+			//fbRight(plan);
 		}
 	}
 
@@ -389,6 +437,7 @@ module fbBuild(plan) {
 			fbTop(plan);
 		}
 	}
+	fbBasketSlots(plan);
 }
 
 module chamBuild(plan) {
@@ -572,8 +621,8 @@ module showPlan() {
 // Build
 module showBuild() {
 	translate([-1000,0,0]) {
-		//color("red") { fb(false); }
-		//color("greenyellow") { ss(false); }
+		color("red") { fb(false); }
+		color("greenyellow") { ss(false); }
 		color("blue") { cham(false); }
 		color("yellow") { exhaustBuild(); }
 	}
