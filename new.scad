@@ -23,6 +23,16 @@ fbBkMaxBottomOffset = 30;
 fbBkHeight = 200;
 fbBkNumRacks = 3;
 
+/// Firebox door
+fbDrD = fbD - 40;
+fbDrH = fbH - 60;
+fbDrHO = 20;
+
+fbRotate = 50;
+
+fbDrBandWidth = 60;
+fbDrBandThick = 6;
+
 // Smoke Stack
 ssW = fbW;
 ssD = fbD;
@@ -42,7 +52,7 @@ chamFrontBackOffset = 150;
 module angle(l) {
 	union() {
 		cube([angleWidth, l, angleThick]);	
-		translate([0,0,angleThick]) {
+		translate([0,0, -(angleHeight - angleThick)]) {
 			cube([angleThick, l, angleHeight - angleThick]);
 		}
 	}
@@ -351,8 +361,21 @@ module fbFront(plan) {
 
 module fbRight(plan) {
 	h = fbH - thick;
-	box(plan, h, fbD);
+	dDP = (fbD - fbDrD) / 2;
+	difference() {
+		box(plan, h, fbD);
+		translate([fbDrHO,dDP,0]) {
+			box(plan, fbDrH, fbDrD);
+			//doc(plan, "Firebox door", "H", fbDrH, "D", fbDrD);
+		}
+	}
 	doc(plan, "Firebox right", "H", h, "D", fbD);
+	if(plan) {
+		text2(plan, str("H = ", fbDrH), fbH - (fbDrHO + 240), dDP + 20);
+		text2(plan, str("D = ", fbDrD), fbDrHO + 20, fbD - (dDP + 20), -90);
+		text2(plan, str("H.Os = ", fbDrHO), fbDrHO, dDP + 20);
+		text2(plan, str("D.Os = ", dDP), fbH - (fbH - fbDrH + fbDrHO + 20), fbD - (dDP + 20), -90);
+	}
 }
 
 module fbLeft(plan) {
@@ -390,10 +413,10 @@ module fbPlan(plan) {
 }
 
 module fbBasketSlots(plan) {
-	h = (fbH - fbBkMaxBottomOffset - angleHeight) - (fbBkMinBottomOffset + fbBkHeight);
+	h = (fbH - fbBkMaxBottomOffset - angleHeight) - (fbBkMinBottomOffset + fbBkHeight - angleHeight);
 	stepHeight = h / (fbBkNumRacks - 1);
 	echo(stepHeight);
-	for(i = [(fbBkMinBottomOffset + fbBkHeight) : stepHeight : (fbH - fbBkMaxBottomOffset - angleHeight)]) {
+	for(i = [(fbBkMinBottomOffset + fbBkHeight - angleHeight) : stepHeight : (fbH - fbBkMaxBottomOffset - angleHeight)]) {
 		echo(i);
 		translate([fbW-thick,0,i]) {
 			rotate([0,0,90]) {
@@ -405,6 +428,28 @@ module fbBasketSlots(plan) {
 				angle(fbW-thick*2);
 			}
 		}
+	}
+}
+
+module fbDoor(plan) {
+	echo(str("fbDrBandWidth ", fbDrBandWidth));
+	echo(str("fbDrBandThick ", fbDrBandThick));
+	box(plan, fbDrH, fbDrD);
+
+	translate([-fbDrHO, - ((fbD + 2 * thick) - fbDrD) / 2 , thick]) {
+		cube([fbDrH + fbDrHO * 2, fbDrBandWidth, fbDrBandThick]);
+	}
+
+	translate([-fbDrHO, fbDrD - fbDrBandWidth / 2 - thick, thick]) {
+		cube([fbDrH + fbDrHO * 2, fbDrBandWidth, fbDrBandThick]);
+	}
+
+	translate([-fbDrHO, fbDrBandWidth / 2 + thick, thick]) {
+		cube([fbDrBandWidth, (fbD + thick * 2) - (fbDrBandWidth * 2), fbDrBandThick ]);
+	}
+
+	translate([fbDrH - fbDrBandWidth + fbDrHO, fbDrBandWidth / 2 + thick, thick]) {
+		cube([fbDrBandWidth, (fbD + thick * 2) - (fbDrBandWidth * 2), fbDrBandThick ]);
 	}
 }
 
@@ -422,7 +467,7 @@ module fbBuild(plan) {
 	}
 	translate([fbW,0,thick]) {
 		rotate([0,-90,0]) {
-			//fbRight(plan);
+			fbRight(plan);
 		}
 	}
 
@@ -438,6 +483,14 @@ module fbBuild(plan) {
 		}
 	}
 	fbBasketSlots(plan);
+
+	translate([fbW - thick, (fbD - fbDrD) / 2, fbDrH + fbDrHO]) {
+		rotate([0,90,0]) {
+			rotate_about_pt3([0, fbDrD + (fbD - fbDrD) / 2 + thick, thick], -fbRotate, 0, 0) {
+				fbDoor(plan);
+			}
+		}
+	}
 }
 
 module chamBuild(plan) {
@@ -621,12 +674,12 @@ module showPlan() {
 // Build
 module showBuild() {
 	translate([-1000,0,0]) {
-		color("red") { fb(false); }
-		color("greenyellow") { ss(false); }
-		color("blue") { cham(false); }
-		color("yellow") { exhaustBuild(); }
+		fb(false);
+		ss(false);
+		cham(false);
+		exhaustBuild();
 	}
 }
 
 showBuild();
-showPlan();
+//showPlan();
