@@ -38,6 +38,16 @@ ssW = fbW;
 ssD = fbD;
 ssH = 800;
 
+/// Smoke Stack door
+ssDrW = ssW - 40;
+ssDrH = ssH - 60;
+ssDrHO = 20;
+
+ssRotate = 50;
+
+ssDrBandWidth = fbDrBandWidth;
+ssDrBandThick = fbDrBandThick;
+
 // Chamber
 
 chamBottomD = 200;
@@ -270,8 +280,21 @@ module ssBack(plan) {
 }
 
 module ssFront(plan) {
-	box(plan, ssW, ssH);
-	doc(plan, "Smoke stack front", "W", ssW, "H", ssH);
+	h = ssH - thick;
+	wDP = (ssW - ssDrW) / 2;
+	difference() {
+		box(plan, ssW, ssH);
+		translate([ssDrHO,wDP,0]) {
+			box(plan, ssDrW, ssDrH);
+		}
+	}
+	doc(plan, "Smoke front", "W", ssW, "H", ssH);
+	if(plan) {
+		text2(plan, str("W = ", ssDrW), ssW - 250, wDP + 20);
+		text2(plan, str("H = ", ssDrH), ssDrHO + 20, ssDrH, -90);
+		text2(plan, str("H.Os = ", ssDrHO), ssW - ssDrW + 30, ssDrHO + 20, 90);
+		text2(plan, str("W.Os = ", wDP), ssW - 300, ssH - (ssH - ssDrH + ssDrHO + 20));
+	}
 }
 
 module ssRight(plan) {
@@ -682,4 +705,4 @@ module showBuild() {
 }
 
 showBuild();
-//showPlan();
+showPlan();
