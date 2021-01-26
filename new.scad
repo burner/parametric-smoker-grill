@@ -48,6 +48,12 @@ ssRotate = 50;
 ssDrBandWidth = fbDrBandWidth;
 ssDrBandThick = fbDrBandThick;
 
+/// FireBox Crates
+
+ssCrMinBottomOffset = 30;
+ssCrMaxOffset = 70;
+ssCrNumRacks = 5;
+
 // Chamber
 
 chamBottomD = 200;
@@ -314,6 +320,26 @@ module ssTop(plan) {
 	doc(plan, "Smoke stack top", "W", ssW, "D", ssD);
 }
 
+module ssCrates(plan) {
+	h = (ssH - ssCrMaxOffset - angleHeight) - (ssCrMinBottomOffset + angleHeight);
+	echo(str("SS.H ", h));
+	stepHeight = h / (ssCrNumRacks - 1);
+	echo(str("SS.S ", stepHeight));
+	for(i = [(ssCrMinBottomOffset + angleHeight) : stepHeight : (ssH - ssCrMaxOffset)]) {
+		echo(str("SS.i ", i));
+		translate([ssD-thick,thick,i]) {
+			rotate([0,0,90]) {
+				angle(ssD);
+			}
+		}
+		translate([0,ssD-thick,i]) {
+			rotate([0,0,-90]) {
+				angle(ssD);
+			}
+		}
+	}
+}
+
 module ssBuild(plan) {
 	translate([0,ssD+thick,fbH+thick]) {
 		rotate([90,0,0]) {
@@ -341,6 +367,12 @@ module ssBuild(plan) {
 	translate([0,0,fbH+ssH]) {
 		rotate([0,0,0]) {
 			ssTop(plan);
+		}
+	}
+
+	translate([ssW,0,fbH + thick]) {
+		rotate([0,0,90]) {
+			ssCrates(plan);
 		}
 	}
 }
@@ -443,7 +475,7 @@ module fbBasketSlots(plan) {
 		echo(i);
 		translate([fbW-thick,0,i]) {
 			rotate([0,0,90]) {
-				#angle(fbW-thick*2);
+				angle(fbW-thick*2);
 			}
 		}
 		translate([thick,fbD,i]) {
