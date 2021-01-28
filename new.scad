@@ -43,7 +43,7 @@ ssDrW = ssW - 40;
 ssDrH = ssH - 60;
 ssDrHO = 20;
 
-ssRotate = 50;
+ssRotate = 0;
 
 ssDrBandWidth = fbDrBandWidth;
 ssDrBandThick = fbDrBandThick;
@@ -303,6 +303,28 @@ module ssFront(plan) {
 	}
 }
 
+module ssDoor(plan) {
+	echo(str("ssDrBandWidth ", ssDrBandWidth));
+	echo(str("ssDrBandThick ", ssDrBandThick));
+	box(plan, ssDrH, ssDrW);
+
+	translate([-ssDrHO, -20, thick]) {
+		cube([ssDrH + ssDrHO * 2, ssDrBandWidth, ssDrBandThick]);
+	}
+
+	translate([-ssDrHO, ssDrW + 20 - ssDrBandWidth, thick]) {
+		cube([ssDrH + ssDrHO * 2, ssDrBandWidth, ssDrBandThick]);
+	}
+
+	translate([-ssDrHO, -20 + ssDrBandWidth, thick]) {
+		cube([ssDrBandWidth, ssW - (2 * ssDrBandWidth), ssDrBandThick ]);
+	}
+
+	translate([ssDrH - ssDrBandWidth + ssDrHO, -20 + ssDrBandWidth, thick]) {
+		cube([ssDrBandWidth, ssW - (2 * ssDrBandWidth), ssDrBandThick ]);
+	}
+}
+
 module ssRight(plan) {
 	h = ssH - thick;
 	box(plan, h, ssD);
@@ -327,7 +349,7 @@ module ssCrates(plan) {
 	echo(str("SS.S ", stepHeight));
 	for(i = [(ssCrMinBottomOffset + angleHeight) : stepHeight : (ssH - ssCrMaxOffset)]) {
 		echo(str("SS.i ", i));
-		translate([ssD-thick,thick,i]) {
+		translate([ssD,thick,i]) {
 			rotate([0,0,90]) {
 				angle(ssD);
 			}
@@ -348,7 +370,7 @@ module ssBuild(plan) {
 	}
 	translate([0,0,fbH+thick]) {
 		rotate([90,0,0]) {
-			ssFront(plan);
+			//ssFront(plan);
 		}
 	}
 
@@ -373,6 +395,15 @@ module ssBuild(plan) {
 	translate([ssW,0,fbH + thick]) {
 		rotate([0,0,90]) {
 			ssCrates(plan);
+		}
+	}
+
+	translate([(ssW - ssDrW) / 2, 0, fbH + ssDrH + ssDrHO + thick]) {
+		rotate([0,0,0]) {
+			rotate_about_pt3([0,0,0], 0, 0, 0) {
+				//ssDoor(plan);
+				color("red") cube([10,20,30]);
+			}
 		}
 	}
 }
@@ -729,12 +760,12 @@ module showPlan() {
 // Build
 module showBuild() {
 	translate([-1000,0,0]) {
-		fb(false);
+		//fb(false);
 		ss(false);
-		cham(false);
-		exhaustBuild();
+		//cham(false);
+		//exhaustBuild();
 	}
 }
 
 showBuild();
-showPlan();
+//showPlan();
