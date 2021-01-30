@@ -70,7 +70,10 @@ chamFrontBackOffset = 150;
 chamDoorWidth = chamWidth - 100;
 chamDoorDepth = 250;
 chamDoorHeight = 325;
-chamDoorRotate = 140;
+chamDoorRotate = 0;
+
+chamBandWidth = fbDrBandWidth;
+chamBandThick = fbDrBandThick;
 
 module angle(l) {
 	union() {
@@ -669,17 +672,26 @@ module chamBuild(plan, door = true) {
 	}
 
 	if(door) {
-		rotate_about_pt3([-chamWidth, chamDoorDepth, chamOffset + chamHeight + thick], -chamDoorRotate, 0, 0) {
+		rotate_about_pt3([-chamWidth, chamDoorDepth - thick, chamOffset + chamHeight + thick], -chamDoorRotate, 0, 0) {
 			chamDoor();
 		}
 	}
 }
 
 module chamDoor() {
-	intersection() {
-		chamBuild(false, false);
-		translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
-			cube([chamDoorWidth, chamDoorDepth, chamDoorHeight]);
+	union() {
+		intersection() {
+			chamBuild(false, false);
+			translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
+				#cube([chamDoorWidth, chamDoorDepth, chamDoorHeight]);
+			}
+		}
+
+		translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 - chamBandWidth / 2))
+				, -(thick + chamBandThick) 
+				, chamOffset + chamHeight - chamDoorHeight + thick]) 
+		{
+			cube([chamBandWidth, chamBandThick, 170]);
 		}
 	}
 }
