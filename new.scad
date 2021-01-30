@@ -43,7 +43,7 @@ ssDrW = ssW - 40;
 ssDrH = ssH - 60;
 ssDrHO = 20;
 
-ssRotate = 0;
+ssDrRotate = 50;
 
 ssDrBandWidth = fbDrBandWidth;
 ssDrBandThick = fbDrBandThick;
@@ -64,6 +64,13 @@ chamWidth = 800;
 chamOffset = 350; // the Z offset of the chamber in relation to the firebox
 chamHeight = 600;
 chamFrontBackOffset = 150;
+
+/// Chamber Door
+
+chamDoorWidth = chamWidth - 100;
+chamDoorDepth = 250;
+chamDoorHeight = 325;
+chamDoorRotate = 140;
 
 module angle(l) {
 	union() {
@@ -370,7 +377,7 @@ module ssBuild(plan) {
 	}
 	translate([0,0,fbH+thick]) {
 		rotate([90,0,0]) {
-			//ssFront(plan);
+			ssFront(plan);
 		}
 	}
 
@@ -399,10 +406,9 @@ module ssBuild(plan) {
 	}
 
 	translate([(ssW - ssDrW) / 2, 0, fbH + ssDrH + ssDrHO + thick]) {
-		rotate([0,0,0]) {
-			rotate_about_pt3([0,0,0], 0, 0, 0) {
-				//ssDoor(plan);
-				color("red") cube([10,20,30]);
+		rotate([90,90,0]) {
+			rotate_about_pt3([0, ssDrW + 20, 5], -ssDrRotate, 0, 0) {
+				ssDoor(plan);
 			}
 		}
 	}
@@ -579,77 +585,101 @@ module fbBuild(plan) {
 	}
 }
 
-module chamBuild(plan) {
-	dB = (fbD - chamBottomD) / 2;
-	translate([-(chamWidth), dB, chamOffset]) {
-		chamBottom(plan);
-	}
+module chamBuild(plan, door = true) {
+	difference() {
+		union() {
+			dB = (fbD - chamBottomD) / 2;
+			translate([-(chamWidth), dB, chamOffset]) {
+				chamBottom(plan);
+			}
 
-	dT = (fbD - chamTopD) / 2;
-	translate([-chamWidth, dT, chamOffset + chamHeight]) {
-		chamTop(plan);
-	}
+			dT = (fbD - chamTopD) / 2;
+			translate([-chamWidth, dT, chamOffset + chamHeight]) {
+				chamTop(plan);
+			}
 
-	translate([-chamWidth, 0, chamOffset + chamFrontBackOffset]) {
-		rotate([90,0,0]) {
-			chamFront(plan);
+			translate([-chamWidth, 0, chamOffset + chamFrontBackOffset]) {
+				rotate([90,0,0]) {
+					chamFront(plan);
+				}
+			}
+
+			translate([-chamWidth, fbD + thick, chamOffset + chamFrontBackOffset]) {
+				rotate([90,0,0]) {
+					chamBack(plan);
+				}
+			}
+
+			translate([-chamWidth, dB, chamOffset + thick]) {
+				d = dB;
+				h = chamFrontBackOffset - thick;
+
+				angle = atan(h / d);
+				echo(str("Chamber angle bottom front ", angle));
+				
+				rotate([180 - angle,0,0]) {
+					chamBottomFront(plan);
+				}
+			}
+			
+			translate([-chamWidth, fbD, chamOffset + chamFrontBackOffset]) {
+				d = dB;
+				h = chamFrontBackOffset - thick;
+
+				angle = atan(h / d);
+				echo(str("Chamber angle bottom back ", angle));
+				
+				rotate([180 + angle,0,0]) {
+					chamBottomBack(plan);
+				}
+			}
+			
+			dbt = (fbD - chamTopD) / 2;
+			translate([-chamWidth, dT + chamTopD, chamOffset + chamHeight]) {
+				h = chamHeight - chamBackH - chamFrontBackOffset;
+
+				angle = atan(h / dbt);
+				echo(str("Chamber angle top back ", angle));
+				rotate([-angle,0,0]) {
+					chamBackTop(plan);
+				}
+			}
+
+			translate([-chamWidth, 0, chamOffset + chamFrontBackOffset + chamFrontH]) {
+				h = chamHeight - chamFrontH - chamFrontBackOffset;
+
+				angle = atan(h / dbt);
+				echo(str("Chamber angle top front ", angle));
+				rotate([angle,0,0]) {
+					chamFrontTop(plan);
+				}
+			}
+
+			translate([-chamWidth + thick, 0, chamOffset + thick]) {
+				rotate([0,-90,0]) {
+					chamFace(plan);
+				}
+			}
+		}
+		if(door) {
+			translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
+				cube([chamDoorWidth, chamDoorDepth, chamDoorHeight]);
+			}
 		}
 	}
 
-	translate([-chamWidth, fbD + thick, chamOffset + chamFrontBackOffset]) {
-		rotate([90,0,0]) {
-			chamBack(plan);
+	if(door) {
+		rotate_about_pt3([-chamWidth, chamDoorDepth, chamOffset + chamHeight + thick], -chamDoorRotate, 0, 0) {
+			chamDoor();
 		}
 	}
+}
 
-	translate([-chamWidth, dB, chamOffset + thick]) {
-		d = dB;
-		h = chamFrontBackOffset - thick;
-
-		angle = atan(h / d);
-		echo(str("Chamber angle bottom front ", angle));
-		
-		rotate([180 - angle,0,0]) {
-			chamBottomFront(plan);
-		}
-	}
-	
-	translate([-chamWidth, fbD, chamOffset + chamFrontBackOffset]) {
-		d = dB;
-		h = chamFrontBackOffset - thick;
-
-		angle = atan(h / d);
-		echo(str("Chamber angle bottom back ", angle));
-		
-		rotate([180 + angle,0,0]) {
-			chamBottomBack(plan);
-		}
-	}
-	
-	dbt = (fbD - chamTopD) / 2;
-	translate([-chamWidth, dT + chamTopD, chamOffset + chamHeight]) {
-		h = chamHeight - chamBackH - chamFrontBackOffset;
-
-		angle = atan(h / dbt);
-		echo(str("Chamber angle top back ", angle));
-		rotate([-angle,0,0]) {
-			chamBackTop(plan);
-		}
-	}
-
-	translate([-chamWidth, 0, chamOffset + chamFrontBackOffset + chamFrontH]) {
-		h = chamHeight - chamFrontH - chamFrontBackOffset;
-
-		angle = atan(h / dbt);
-		echo(str("Chamber angle top front ", angle));
-		rotate([angle,0,0]) {
-			chamFrontTop(plan);
-		}
-	}
-
-	translate([-chamWidth + thick, 0, chamOffset + thick]) {
-		rotate([0,-90,0]) {
-			chamFace(plan);
+module chamDoor() {
+	intersection() {
+		chamBuild(false, false);
+		translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
+			cube([chamDoorWidth, chamDoorDepth, chamDoorHeight]);
 		}
 	}
 }
@@ -760,10 +790,10 @@ module showPlan() {
 // Build
 module showBuild() {
 	translate([-1000,0,0]) {
-		//fb(false);
+		fb(false);
 		ss(false);
-		//cham(false);
-		//exhaustBuild();
+		cham(false);
+		exhaustBuild();
 	}
 }
 
