@@ -70,10 +70,16 @@ chamFrontBackOffset = 150;
 chamDoorWidth = chamWidth - 100;
 chamDoorDepth = 250;
 chamDoorHeight = 325;
-chamDoorRotate = 30;
+chamDoorRotate = 70;
 
 chamBandWidth = fbDrBandWidth;
 chamBandThick = fbDrBandThick;
+
+/// Chamber Face Door
+
+chamFaceDoorHeight = 75;
+chamFaceSealWidth = 30;
+chamFaceDoorRotate = 70;
 
 module angle(l) {
 	union() {
@@ -209,68 +215,128 @@ module chamFace(plan) {
 	dB = (fbD - chamBottomD) / 2;
 	d = chamTopD < chamBottomD ? chamTop : chamBottomD;
 	dS = fbD - d;
-	translate([0, dT < dB ? dT : dB, 0]) {
-		box(plan, chamHeight - thick, d);
-	}
-
-	translate([chamFrontBackOffset - thick, 0, 0]) {
-		box(plan, chamFrontH, dS / 2);
-	}
-
-	translate([chamFrontBackOffset - thick, dS / 2 + d, 0]) {
-		box(plan, chamBackH, dS / 2);
-	}
-
-	translate([chamFrontBackOffset + chamBackH - thick, dS / 2 + d + dT, 0]) {
-		if(plan) {
-			rotate([0,0,-90]) {
-				prism2(dT, chamHeight - chamFrontBackOffset - chamBackH);
+	difference() {
+		union() {
+			translate([0, dT < dB ? dT : dB, 0]) {
+				box(plan, chamHeight - thick, d);
 			}
-		} else {
-			rotate([0,-90,180]) {
-				prism(thick, dT, chamHeight - chamFrontBackOffset - chamBackH);
-			}
-		}
-	}
 
-	translate([chamFrontBackOffset + chamFrontH - thick, 0, thick]) {
-		if(plan) {
-			translate([chamHeight - chamFrontBackOffset - chamFrontH, dT, -thick]) {
-				rotate([0,0,-180]) {
-					prism2(chamHeight - chamFrontBackOffset - chamFrontH, dT);
+			translate([chamFrontBackOffset - thick, 0, 0]) {
+				box(plan, chamFrontH, dS / 2);
+			}
+
+			translate([chamFrontBackOffset - thick, dS / 2 + d, 0]) {
+				box(plan, chamBackH, dS / 2);
+			}
+
+			translate([chamFrontBackOffset + chamBackH - thick, dS / 2 + d + dT, 0]) {
+				if(plan) {
+					rotate([0,0,-90]) {
+						prism2(dT, chamHeight - chamFrontBackOffset - chamBackH);
+					}
+				} else {
+					rotate([0,-90,180]) {
+						prism(thick, dT, chamHeight - chamFrontBackOffset - chamBackH);
+					}
 				}
 			}
-		} else {
-			rotate([0,90,0]) {
-				prism(thick, dT, chamHeight - chamFrontBackOffset - chamBackH);
-			}
-		}
-	}
 
-	translate([chamFrontBackOffset - thick, dS / 2 + d + dT, thick]) {
-		if(plan) {
-			translate([-(chamFrontBackOffset - thick), -dB, -thick]) {
-				rotate([0,0,0]) {
-					prism2(chamFrontBackOffset - thick, dB);
+			translate([chamFrontBackOffset + chamFrontH - thick, 0, thick]) {
+				if(plan) {
+					translate([chamHeight - chamFrontBackOffset - chamFrontH, dT, -thick]) {
+						rotate([0,0,-180]) {
+							prism2(chamHeight - chamFrontBackOffset - chamFrontH, dT);
+						}
+					}
+				} else {
+					rotate([0,90,0]) {
+						prism(thick, dT, chamHeight - chamFrontBackOffset - chamBackH);
+					}
 				}
 			}
-		} else {
-			rotate([180,90,0]) {
-				prism(thick, dB, chamFrontBackOffset - thick);
-			}
-		}
-	}
 
-	translate([chamFrontBackOffset - thick, 0, 0]) {
-		if(plan) {
-			translate([0, 0, 0]) {
-				rotate([0,0,90]) {
-					prism2(dB, chamFrontBackOffset - thick);
+			translate([chamFrontBackOffset - thick, dS / 2 + d + dT, thick]) {
+				if(plan) {
+					translate([-(chamFrontBackOffset - thick), -dB, -thick]) {
+						rotate([0,0,0]) {
+							prism2(chamFrontBackOffset - thick, dB);
+						}
+					}
+				} else {
+					rotate([180,90,0]) {
+						prism(thick, dB, chamFrontBackOffset - thick);
+					}
 				}
 			}
-		} else {
-			rotate([180,-90,180]) {
-				prism(thick, dB, chamFrontBackOffset - thick);
+
+			translate([chamFrontBackOffset - thick, 0, 0]) {
+				if(plan) {
+					translate([0, 0, 0]) {
+						rotate([0,0,90]) {
+							prism2(dB, chamFrontBackOffset - thick);
+						}
+					}
+				} else {
+					rotate([180,-90,180]) {
+						prism(thick, dB, chamFrontBackOffset - thick);
+					}
+				}
+			}
+		}
+
+		union() {
+			sealWidth = chamFaceSealWidth / 2;
+			translate([chamFrontBackOffset - thick, dS / 2 + d + dT - sealWidth, thick]) {
+				if(plan) {
+					translate([-(chamFrontBackOffset - thick), -dB, -thick]) {
+						rotate([0,0,0]) {
+							prism2(chamFrontBackOffset - thick - sealWidth, dB - sealWidth);
+						}
+					}
+				} else {
+					rotate([180,90,0]) {
+						prism(thick, dB - sealWidth, chamFrontBackOffset - thick - sealWidth);
+					}
+				}
+			}
+			translate([chamFrontBackOffset - thick, +sealWidth, 0]) {
+				if(plan) {
+					translate([0, 0, 0]) {
+						rotate([0,0,90]) {
+							prism2(dB - sealWidth, chamFrontBackOffset - thick - sealWidth);
+						}
+					}
+				} else {
+					rotate([180,-90,180]) {
+						prism(thick, dB - sealWidth, chamFrontBackOffset - thick - sealWidth);
+					}
+				}
+			}
+			translate([chamFrontBackOffset - thick, dB, thick]) {
+				if(plan) {
+					translate([0, 0, 0]) {
+						rotate([0,0,90]) {
+							box(plan, chamFrontBackOffset - thick - sealWidth, chamBottomD);
+						}
+					}
+				} else {
+					rotate([180,0,180]) {
+						box(plan, chamFrontBackOffset - thick - sealWidth, chamBottomD);
+					}
+				}
+			}
+			translate([chamFrontBackOffset - thick, sealWidth, 0]) {
+				if(plan) {
+					translate([0, 0, 0]) {
+						rotate([0,0,90]) {
+							box(plan, chamFaceDoorHeight, fbD - chamFaceSealWidth);
+						}
+					}
+				} else {
+					rotate([0,0,0]) {
+						box(plan, chamFaceDoorHeight, fbD - chamFaceSealWidth);
+					}
+				}
 			}
 		}
 	}
@@ -876,4 +942,4 @@ module showBuild() {
 }
 
 showBuild();
-//showPlan();
+showPlan();
