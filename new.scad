@@ -79,7 +79,7 @@ chamBandThick = fbDrBandThick;
 
 chamFaceDoorHeight = 75;
 chamFaceSealWidth = 30;
-chamFaceDoorRotate = 0;
+chamFaceDoorRotate = 90;
 
 chamFaceBandWidth = fbDrBandWidth;
 chamFaceBandThick = fbDrBandThick;
@@ -411,7 +411,6 @@ module chamFace(plan) {
 		}
 	}
 
-
 	if(plan) {
 		text2(plan, "Cham face", 10, fbD + 180, 0);
 		text2(plan, str("Overall = ", chamHeight), chamFrontBackOffset, fbD + 80, 0);
@@ -420,6 +419,28 @@ module chamFace(plan) {
 		text2(plan, str("FrontBackOffset = ", chamFrontBackOffset), chamFrontBackOffset, -140, 0);
 		text2(plan, str("Cham top = ", chamTopD), chamHeight + 30, fbD, -90);
 		text2(plan, str("Cham bottom = ", chamBottomD), -50, fbD, -90);
+	}
+}
+
+module chamCoalBasket(plan) {
+	rotate([0,270,0]) {
+		angle(chamWidth);
+	}	
+	translate([fbD - thick / 2, 0, 0]) {
+		rotate([0,180,0]) {
+			angle(chamWidth);
+		}	
+	}
+}
+
+module chamGrades(plan) {
+	rotate([0,180,0]) {
+		angle(fbD + thick);
+	}
+	translate([-chamDoorWidth - angleThick, 0, -angleThick]) {
+		rotate([0,270,0]) {
+			angle(fbD + thick);
+		}
 	}
 }
 
@@ -735,7 +756,7 @@ module chamBuild(plan, door = true) {
 
 			dT = (fbD - chamTopD) / 2;
 			translate([-chamWidth, dT, chamOffset + chamHeight]) {
-				chamTop(plan);
+				//chamTop(plan);
 			}
 
 			translate([-chamWidth, 0, chamOffset + chamFrontBackOffset]) {
@@ -781,7 +802,7 @@ module chamBuild(plan, door = true) {
 				angle = atan(h / dbt);
 				echo(str("Chamber angle top back ", angle));
 				rotate([-angle,0,0]) {
-					chamBackTop(plan);
+					//chamBackTop(plan);
 				}
 			}
 
@@ -791,7 +812,7 @@ module chamBuild(plan, door = true) {
 				angle = atan(h / dbt);
 				echo(str("Chamber angle top front ", angle));
 				rotate([angle,0,0]) {
-					chamFrontTop(plan);
+					//chamFrontTop(plan);
 				}
 			}
 
@@ -800,6 +821,13 @@ module chamBuild(plan, door = true) {
 					chamFace(plan);
 				}
 			}
+
+			translate([0, angleThick, chamOffset + chamFrontBackOffset + angleWidth / 2 ]) {
+				rotate([0,0,90]) {
+					chamCoalBasket(plan);
+				}
+			}
+
 		}
 		if(door) {
 			translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
@@ -812,8 +840,16 @@ module chamBuild(plan, door = true) {
 		rotate_about_pt3([-chamWidth, chamDoorDepth - thick + chamBandWidth / 2, chamOffset + chamHeight + thick]
 				, -chamDoorRotate, 0, 0) 
 		{
-			chamDoor();
+			//chamDoor();
 		}
+	}
+
+	translate([-angleWidth + angleThick, 0, chamOffset + chamHeight - chamDoorHeight + thick]) {
+		chamGrades(plan);
+	}
+
+	translate([-angleWidth + angleThick, 0, chamOffset + chamHeight - chamDoorHeight + thick + 100]) {
+		chamGrades(plan);
 	}
 }
 
