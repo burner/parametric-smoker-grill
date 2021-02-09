@@ -84,6 +84,10 @@ chamFaceDoorRotate = 90;
 chamFaceBandWidth = fbDrBandWidth;
 chamFaceBandThick = fbDrBandThick;
 
+// Firebox - Chamber Hatch
+
+fbChamPercentOpen = 0.5;
+
 module angle(l) {
 	union() {
 		cube([angleWidth, l, angleThick]);	
@@ -403,11 +407,13 @@ module chamFace(plan) {
 		}
 	}
 
-	translate([chamFrontBackOffset-thick,0,0]) {
-		rotate_about_pt3([chamFrontBackOffset - thick, fbD + thick, thick]
-			, -chamFaceDoorRotate, 0, 0) 
-		{
-			chamFaceDoor(plan, true);
+	if(!plan) {
+		translate([chamFrontBackOffset-thick,0,0]) {
+			rotate_about_pt3([chamFrontBackOffset - thick, fbD + thick, thick]
+				, -chamFaceDoorRotate, 0, 0) 
+			{
+				chamFaceDoor(plan, true);
+			}
 		}
 	}
 
@@ -633,8 +639,33 @@ module fbRight(plan) {
 
 module fbLeft(plan) {
 	h = fbH - thick;
-	box(plan, h, fbD);
 	doc(plan, "Firebox left", "H", h, "D", fbD);
+	difference() {
+		box(plan, h, fbD);
+		dT = (fbD - chamTopD) / 2 - 30;
+		dB = (fbD - chamBottomD) / 2 - 30;
+		d = chamTopD < chamBottomD ? chamTop : chamBottomD;
+		dS = fbD - d;
+		if(plan) {
+			translate([chamOffset, fbD - dB - 30, 0]) {
+				rotate([0,0,0]) {
+					prism2(chamFrontBackOffset - thick, dB);
+				}
+			}
+			translate([chamOffset, fbD - dB - 30 - chamBottomD, 0]) {
+				square([chamFrontBackOffset - thick, chamBottomD]);
+			}
+		} else {
+			translate([chamOffset + dB + 30 - thick, fbD - 30, thick]) {
+				rotate([0,90,180]) {
+					prism(thick, dB, dB);
+				}
+			}
+			translate([chamOffset + 30 - thick, fbD - chamBottomD - dB - 30, 0]) {
+				cube([chamFrontBackOffset - 30, chamBottomD, thick]);
+			}
+		}
+	}
 }
 
 module fbTop(plan) {
@@ -708,34 +739,57 @@ module fbDoor(plan) {
 
 module fbBuild(plan) {
 	fbBottom(plan);
-	translate([0,fbD+thick,0]) {
-		rotate([90,0,0]) {
-			fbBack(plan);
-		}
-	}
-	translate([0,0,0]) {
-		rotate([90,0,0]) {
-			fbFront(plan);
-		}
-	}
-	translate([fbW,0,thick]) {
-		rotate([0,-90,0]) {
-			fbRight(plan);
-		}
-	}
+	difference() {
+		union() {
+			translate([0,fbD+thick,0]) {
+				rotate([90,0,0]) {
+					fbBack(plan);
+				}
+			}
+			translate([0,0,0]) {
+				rotate([90,0,0]) {
+					fbFront(plan);
+				}
+			}
+			translate([fbW,0,thick]) {
+				rotate([0,-90,0]) {
+					//fbRight(plan);
+				}
+			}
 
-	translate([thick,0,thick]) {
-		rotate([0,-90,0]) {
-			fbLeft(plan);
-		}
-	}
+			translate([thick,0,thick]) {
+				rotate([0,-90,0]) {
+					fbLeft(plan);
+				}
+			}
 
-	translate([0,-thick,fbH]) {
-		rotate([0,0,0]) {
-			fbTop(plan);
+			translate([0,-thick,fbH]) {
+				rotate([0,0,0]) {
+					fbTop(plan);
+				}
+			}
+			fbBasketSlots(plan);
+		}
+		union() {
+			dT = (fbD - chamTopD) / 2 - 30;
+			dB = (fbD - chamBottomD) / 2 - 30;
+			d = chamTopD < chamBottomD ? chamTop : chamBottomD;
+			dS = fbD - d;
+			if(plan) {
+				translate([0,0,0]) {
+					rotate([0,0,0]) {
+						prism2(chamFrontBackOffset - thick, dB);
+					}
+				}
+			} else {
+				translate([0, fbW - 30, chamOffset + dB + 30]) {
+					rotate([180,0,0]) {
+						prism(thick, dB, dB);
+					}
+				}
+			}
 		}
 	}
-	fbBasketSlots(plan);
 
 	translate([fbW - thick, (fbD - fbDrD) / 2, fbDrH + fbDrHO]) {
 		rotate([0,90,0]) {
@@ -1042,11 +1096,11 @@ module showPlan() {
 module showBuild() {
 	translate([-1000,0,0]) {
 		fb(false);
-		ss(false);
+		//ss(false);
 		cham(false);
-		exhaustBuild();
+		//exhaustBuild();
 	}
 }
 
 showBuild();
-//showPlan();
+showPlan();
