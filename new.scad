@@ -86,7 +86,7 @@ chamFaceBandThick = fbDrBandThick;
 
 // Firebox - Chamber Hatch
 
-fbChamPercentOpen = 0.5;
+fbChamPercentOpen = 0.6;
 
 module angle(l) {
 	union() {
@@ -614,8 +614,13 @@ module fbBack(plan) {
 }
 
 module fbFront(plan) {
-	box(plan, fbW, fbH);
 	doc(plan, "Firebox front", "W", fbW, "H", fbH);
+	difference() {
+		box(plan, fbW, fbH);
+		translate([fbW * 0.50, 35, 0]) {
+			box(plan, fbW * 0.4, 100);
+		}
+	}
 }
 
 module fbRight(plan) {
@@ -800,6 +805,23 @@ module fbBuild(plan) {
 	}
 }
 
+module chamFBvalve() {
+	union() {
+		dT = (fbD - chamTopD) / 2 - 30;
+		dB = (fbD - chamBottomD) / 2 - 30;
+		d = chamTopD < chamBottomD ? chamTop : chamBottomD;
+		dS = fbD - d;
+		translate([chamOffset + dB + 80 - thick, fbD + 15, thick]) {
+			rotate([0,90,180]) {
+				prism(thick, dB + 45, dB + 45);
+			}
+		}
+		translate([chamOffset + 30, 0, 0]) {
+			cube([chamFrontBackOffset + 15, fbD - (chamBottomD/2) - 50, thick]);
+		}
+	}
+}
+
 module chamBuild(plan, door = true) {
 	difference() {
 		union() {
@@ -886,6 +908,18 @@ module chamBuild(plan, door = true) {
 		if(door) {
 			translate([-(chamWidth - ((chamWidth - chamDoorWidth) / 2 )), -thick, chamOffset + chamHeight - chamDoorHeight + thick]) {
 				cube([chamDoorWidth, chamDoorDepth, chamDoorHeight]);
+			}
+		}
+		dB = (fbD - chamBottomD) / 2 - 30;
+		translate([-thick, -thick, chamOffset + 5]) {
+			cube([thick,chamBottomD, dB + 30 + 15]);
+		}
+	}
+
+	if(!plan) {
+		translate([0, -((fbD-chamBottomD/2) * fbChamPercentOpen), -25]) {
+			rotate([0,-90,0]) {
+				chamFBvalve();
 			}
 		}
 	}
