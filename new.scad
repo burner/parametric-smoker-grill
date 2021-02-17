@@ -33,6 +33,9 @@ fbRotate = 50;
 fbDrBandWidth = 60;
 fbDrBandThick = 6;
 
+/// Firebox air intake
+fbAIOpen = 0.9;
+
 // Smoke Stack
 ssW = fbW;
 ssD = fbD;
@@ -83,6 +86,9 @@ chamFaceDoorRotate = 90;
 
 chamFaceBandWidth = fbDrBandWidth;
 chamFaceBandThick = fbDrBandThick;
+
+/// Chamber Air Intake
+chamAIOpen = 0.9;
 
 // Firebox - Chamber Hatch
 
@@ -192,8 +198,21 @@ module chamBack(plan) {
 module chamBottomFront(plan) {
 	dB = (fbD - chamBottomD) / 2;
 	h = sqrt(pow(dB, 2) + pow(chamFrontBackOffset - thick, 2));
-	box(plan, chamWidth, h);
 	doc(plan, "Chamber bottom front", "W", chamWidth, "H", h);
+	aiW = 150;
+	aiH = h / 2;
+	difference() {
+		box(plan, chamWidth, h);
+		translate([chamWidth/2-aiW/2, h / 2 - aiH / 2, 0]) {
+			box(plan, aiW, aiH);
+		}
+	}
+	if(!plan) {
+		cAIw = (aiW + 40) * chamAIOpen;
+		translate([chamWidth/2-aiW/2 - 20 - cAIw, h / 2 - aiH / 2 - 15, thick]) {
+			box(plan, aiW + 40, aiH + 30);
+		}
+	}
 }
 
 module chamBottomBack(plan) {
@@ -617,7 +636,7 @@ module fbFront(plan) {
 	doc(plan, "Firebox front", "W", fbW, "H", fbH);
 	difference() {
 		box(plan, fbW, fbH);
-		translate([fbW * 0.50, 35, 0]) {
+		translate([fbW * 0.50, 30, 0]) {
 			box(plan, fbW * 0.4, 100);
 		}
 	}
@@ -792,6 +811,15 @@ module fbBuild(plan) {
 						prism(thick, dB, dB);
 					}
 				}
+			}
+		}
+	}
+
+	translate([0, -thick, 0]) {
+		w = (fbW * 0.4 + 40) * fbAIOpen;
+		translate([(fbW * 0.50 - 20) - w, 0, 30 - 20]) {
+			rotate([90, 0, 0]) {
+				box(plan, fbW * 0.4 + 40, 100 + 40);
 			}
 		}
 	}
