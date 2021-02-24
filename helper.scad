@@ -8,3 +8,24 @@ module prism(l, w, h){
 module prism2(l, w) {
 	polygon([[0,0], [l, 0], [l, w]]);
 }
+
+module tube(len,tubeSide,tubeThick,bCut=false,bAngle=0,tCut=false,tAngle=0) {
+	difference() {
+		cube([tubeSide,tubeSide,len]);
+		if(bCut) {
+			rotate_about_pt(bAngle, 0, [tubeSide/2, tubeSide/2,0]) {
+				prism(tubeSide,tubeSide,tubeSide);
+			}
+		}
+		if(tCut) {
+			translate([0,0,len]) {
+				rotate_about_pt(tAngle, 180, [tubeSide/2, tubeSide/2,0]) {
+					prism(tubeSide,tubeSide,tubeSide);
+				}
+			}
+		}
+		translate([tubeThick,tubeThick,0]) {
+			cube([tubeSide-2*tubeThick,tubeSide-2*tubeThick,len+1]);
+		}
+	}
+}

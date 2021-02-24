@@ -152,27 +152,6 @@ module rotate_about_pt(z, y, pt) {
                 children();   
 }
    
-module tube(len,bCut=false,bAngle=0,tCut=false,tAngle=0) {
-	difference() {
-		cube([tubeSide,tubeSide,len]);
-		if(bCut) {
-			rotate_about_pt(bAngle, 0, [tubeSide/2, tubeSide/2,0]) {
-				prism(tubeSide,tubeSide,tubeSide);
-			}
-		}
-		if(tCut) {
-			translate([0,0,len]) {
-				rotate_about_pt(tAngle, 180, [tubeSide/2, tubeSide/2,0]) {
-					prism(tubeSide,tubeSide,tubeSide);
-				}
-			}
-		}
-		translate([tubeThick,tubeThick,0]) {
-			cube([tubeSide-2*tubeThick,tubeSide-2*tubeThick,len+1]);
-		}
-	}
-}
-
 // Chamber Begin
 
 module chamBottom(plan) {
@@ -1118,7 +1097,7 @@ module exhaustBuild() {
 
 	translate([-100, fbD - tubeSide * 1.0, chamOffset + chamFrontBackOffset + chamBackH]) {
 		difference() {
-			tube(700);
+			tube(700, tubeSide, tubeThick);
 			translate([0,-200,-200]) {
 				rotate_about_pt3([0,300,200],-angle,0,0) {
 					cube([tubeSide,300,200]);
@@ -1129,7 +1108,7 @@ module exhaustBuild() {
 
 	translate([-chamWidth + 5, fbD - tubeSide * 1.0, chamOffset + chamFrontBackOffset + chamBackH]) {
 		difference() {
-			tube(700);
+			tube(700, tubeSide, tubeThick);
 			translate([0,-200,-200]) {
 				rotate_about_pt3([0,300,200],-angle,0,0) {
 					cube([tubeSide,300,200]);
