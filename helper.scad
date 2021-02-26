@@ -1,3 +1,17 @@
+module rotate_about_pt3(pt, x, z, y) {
+    translate(pt)
+        rotate([x, y, z]) // CHANGE HERE
+            translate(-pt)
+                children();   
+}
+
+module rotate_about_pt(z, y, pt) {
+    translate(pt)
+        rotate([0, y, z]) // CHANGE HERE
+            translate(-pt)
+                children();   
+}
+   
 module prism(l, w, h){
     polyhedron(
             points=[[0,0,0], [l,0,0], [l,w,0], [0,w,0], [0,w,h], [l,w,h]],

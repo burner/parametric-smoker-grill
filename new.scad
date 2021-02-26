@@ -138,20 +138,6 @@ tubeSide=100;
 tubeThick=3;
 tubeIns=2;
 
-module rotate_about_pt3(pt, x, z, y) {
-    translate(pt)
-        rotate([x, y, z]) // CHANGE HERE
-            translate(-pt)
-                children();   
-}
-
-module rotate_about_pt(z, y, pt) {
-    translate(pt)
-        rotate([0, y, z]) // CHANGE HERE
-            translate(-pt)
-                children();   
-}
-   
 // Chamber Begin
 
 module chamBottom(plan) {

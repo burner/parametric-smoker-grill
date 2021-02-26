@@ -47,7 +47,12 @@ module trap(w1,d,w2,h) {
 
 module box() {
 	difference() {
-		cube([bW, bD, bH]);
+		union() {
+			cube([bW, bD, bH]);
+			translate([0,-tubeThick,0]) {
+				cube([bW, tubeThick, 50]);
+			}
+		}
 		translate([bT,-0.1,-0.1]) {
 			cube([bW - bT * 2, bD - bT + 0.1, bH + 0.2]);
 		}
@@ -55,30 +60,36 @@ module box() {
 }
 
 module raiser() {
-	dT = (bD - tubeSide) / 2;
+	dT = (bD - tubeSide) / 2 - tubeThick/2;
 	d = sqrt(pow(dT, 2) + pow(bOffset, 2));
-	echo(dT);
-	translate([0, tubeSide, 0]) {
-		a = atan((bOffset - tubeThick) / dT);
+	translate([tubeSide, tubeSide, 0]) {
+		a = atan((bOffset) / dT);
 		echo(a);
-		rotate([a, 0, 0]) {
-			//trap(tubeSide, d, bW - tubeThick * 2, tubeThick);
+		rotate([-a, 180, 0]) {
+			trap(tubeSide, d, bW - tubeThick * 2, tubeThick);
 		}
 	}
-	translate([tubeSide, tubeThick/2, 0]) {
-		a = atan((bOffset - tubeThick) / dT);
+	translate([0, 0, 0]) {
+		a = atan((bOffset) / dT);
 		echo(a);
-		rotate([a, 0, 180]) {
-			trap(tubeSide, d, bW - tubeThick, tubeThick);
+		rotate([-a, 180, 180]) {
+			trap(tubeSide, d, bW - tubeThick * 2, tubeThick);
 		}
 	}
 
 	dT2 = (bW - tubeSide) / 2 - tubeThick;
 	d2 = sqrt(pow(dT2, 2) + pow(bOffset, 2));
-	translate([0, tubeThick/2, 0]) {
-		a = atan((bOffset - tubeThick) / dT2);
+	translate([tubeSide, 0, 0]) {
+		a = atan((bOffset) / dT2);
 		echo(a);
-		rotate([a, 0, 90]) {
+		rotate([-a, 180, -90]) {
+			trap(tubeSide, d2, bD - tubeThick, tubeThick);
+		}
+	}
+	translate([0, tubeSide, 0]) {
+		a = atan((bOffset) / dT2);
+		echo(a);
+		rotate([-a, 180, 90]) {
 			trap(tubeSide, d2, bD - tubeThick, tubeThick);
 		}
 	}
@@ -86,12 +97,11 @@ module raiser() {
 
 union() {
 	tube(tH, tubeSide, tubeThick);
-	translate([0, -tubeThick/2, tH]) {
+	translate([0, 0, tH]) {
 		raiser();
 	}
 
 	translate([-bW/2 + tubeSide/2, -bD/2 + tubeSide/2 + tubeThick/2, tH + bOffset]) {
 		box();
 	}
-
 }
